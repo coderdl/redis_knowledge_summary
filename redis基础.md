@@ -38,9 +38,9 @@ Redis字符串可以支持储存：1.字符串 2.整数 3.浮点数
 
 注3：使用GETBIT时，超过字符串末尾的二进制位会被当作0
 
-###2.列表 ###
+### 2.列表 ###
 
-####1.列表常用命令 ####
+#### 1.列表常用命令 ####
 1. RPUSH key-name value [value ...]
 2. LPUSH key-name value [value ...]
 3. RPOP key-name
@@ -53,6 +53,7 @@ Redis字符串可以支持储存：1.字符串 2.整数 3.浮点数
 10. RPOPLPUSH source-key dest-key
 11. BRPOPLPUSH source-key dest-key timeout
 
-###3.集合 ####
-####1.集合常用命令 ####
+### 3.集合 ####
+
+#### 1.集合常用命令 ####
 
