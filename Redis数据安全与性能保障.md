@@ -54,3 +54,54 @@ no|让操作系统来决定何时进行同步|不会对Redis性能造成影响�
 1）因为从服务器也可以拥有自己的从服务器，所以可能会形成一条主从链
 2）主从链如下图：
 ![](https://github.com/coderdl/redis_knowledge_summary/blob/master/%E5%BC%95%E7%94%A8%E5%9B%BE%E7%89%87/%E4%B8%BB%E4%BB%8E%E9%93%BE.png)
+
+## 3.Redis事务 ##
+
+### 1.Redis事务的基本定义 ###
+1）Redis的事务以MULTI未开始，之后跟着用户传入的多个命令，最后以EXEC为结束，但是这种方式在EXEC被调用之前不会执行任何实质操作，所以用户没办法根据读到的数据类型来做决定。
+
+2） Redis在执行事务的过程中，会延迟执行已入队的命令，直到收到客户端发送的EXEC命令。这种“一次性发送多个命令，然后等待所有回复出现”的做法通常被称作“流水线”。
+
+### 2.Redis事务的常见命令 ###
+
+1. MULTI开始一个事务 
+2. WATCH WATCH指令对键进行监视，在WATCH到EXEC这段时间里，如果有其他客户端抢先对被监听的键进行了替换，更新或删除操作，那在EXEC时，事务将执行失败，并返回一个WATCHError.
+3. UNWATCH 不再对某个键进行监视
+4. DISCARD 
+5. EXEC 执行一个事务
+
+### 3.Redis事务实例 ###
+    
+
+
+	def list_item(conn, itemid, sellerid, price):
+		inventory = 'inventory:%s'%sellerid
+		item = '%s.%s'%(itemid, sellerid)
+		end = time.time() + 5
+		pipe = conn.pipe()
+		while time.time() < end:
+			try:
+				pipe.watch(inventory)
+				if not pipe.sismeber(inventory, itemid):
+					pipe.unwatch()
+					return None
+		
+				pipe.multi()
+				pipe.zadd("market": item, pirce")
+				pipe.srem("inventory", itemid)
+				pipe.exec()
+				return True
+			except redis.exceptions.WATCHError:
+				pass
+		return False
+    
+
+
+### 4.非事务型流水线 ###
+    
+
+	pipe = conn.pipeline()
+    
+1）如果用户在执行pipeline()时传入True作为参数，或者不传入参数，那么客户端将使用MULTI和EXEC包裹起来用户要执行的所有命令。
+2）如果用户在执行pipeline()时传入False作为参数，那么客户端会像执行事务那样收集起用户要执行的所有命令，但是不适用mutli和exec包裹起来。
+3) 如果用户需要向Redis发送多个命令，并且对于这些命令来说，一个命令的执行结果并不会影响到另一个命令的输入，而且这些命令也不需要以事物的方式执行，那使用非事务型流水线可以提升Redis的性能。
