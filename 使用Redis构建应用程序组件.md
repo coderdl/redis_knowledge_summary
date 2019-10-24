@@ -22,6 +22,7 @@ Redis的SETNX命令只会在键（key）不存在的情况下为键设置值，�
 
 1）获取锁的实例
     
+
 	def acquire_lock(conn, lockname, acquire_timeout=10):
 		identifier = str(uuid.uuid4())
 		
