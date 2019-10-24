@@ -36,10 +36,11 @@ Redis的SETNX命令只会在键（key）不存在的情况下为键设置值，�
 
 2) 释放锁的实例
     
+
 	def release_lock(conn, lockname, identifier):
 		pipe = conn.pipeline(True)
 		lockname = 'lockname:' + lockname
-
+		
 		while True:
 			try:
 				pipe.watch(lockname)
